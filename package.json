@@ -1,14 +1,31 @@
 {
-  "name": "pi-custom-provider",
+  "name": "pi-custom-provider-model",
   "version": "0.1.0",
   "private": true,
   "description": "A local browser-based custom provider and API-key manager for Pi.",
   "type": "module",
   "license": "MIT",
-  "keywords": ["pi-package", "pi-extension", "providers", "models"],
-  "files": ["src/", "web/", "README.md", "LICENSE", "docs/"],
-  "pi": { "extensions": ["./src/index.ts"] },
-  "engines": { "node": ">=22.19.0" },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "providers",
+    "models"
+  ],
+  "files": [
+    "src/",
+    "web/",
+    "README.md",
+    "LICENSE",
+    "docs/"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "scripts": {
     "dev": "tsx src/standalone.ts",
     "check": "tsc --noEmit",
