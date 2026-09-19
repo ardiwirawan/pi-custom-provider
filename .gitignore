@@ -1,0 +1,8 @@
+node_modules/
+*.tgz
+.sandbox/
+test-results/
+playwright-report/
+.env
+.env.*
+!.env.example

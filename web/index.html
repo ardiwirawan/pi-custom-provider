@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Pi · Provider Manager</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Pi Provider Manager"><span class="pi-mark">π</span><span>Provider Manager<small>FOR PI CODING AGENT</small></span></a>
+    <div class="top-actions"><span class="local-badge"><i></i><span data-i18n="local">Local workspace</span></span><select id="language" aria-label="Language"><option value="en">English</option><option value="id">Indonesia</option></select></div>
+  </header>
+  <div class="layout">
+    <aside>
+      <div class="sidebar-heading"><h2 data-i18n="providers">Providers</h2><span id="provider-count" class="count">0</span></div>
+      <button id="new-provider" class="primary wide" data-i18n="addProvider">+ Add provider</button>
+      <nav id="provider-list" aria-label="Providers"></nav>
+      <footer class="sidebar-footer"><span class="eyebrow" data-i18n="configuration">CONFIGURATION</span><code id="config-path">…</code><span id="version"></span><a href="https://pi.dev/docs/latest" target="_blank" rel="noreferrer" data-i18n="docs">Official Pi documentation ↗</a></footer>
+    </aside>
+    <main>
+      <div class="page-heading"><div><span class="eyebrow" data-i18n="connections">CONNECTIONS</span><h1 id="editor-title">New provider</h1><p data-i18n="subtitle">Your endpoint. Your models. Native Pi configuration.</p></div><button id="refresh-state" class="quiet" data-i18n="refresh">Reload configuration</button></div>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <form id="provider-form">
+        <section class="card">
+          <div class="section-heading"><div><span class="step">01</span><h2 data-i18n="connection">Connection</h2></div><span class="tag" data-i18n="native">Pi native</span></div>
+          <div id="readonly-note" class="info" hidden data-i18n="readonly">This provider is managed by Pi or another integration. Create a custom provider to edit here.</div>
+          <fieldset id="connection-fields">
+            <div class="grid two">
+              <label><span data-i18n="providerId">Provider ID</span><input id="provider-id" required maxlength="80" placeholder="my-gateway" autocomplete="off" spellcheck="false"><small data-i18n="idHelp">A unique name used by Pi, e.g. my-gateway.</small></label>
+              <label><span data-i18n="protocol">API protocol</span><select id="api"><option value="openai-completions">OpenAI · Chat Completions</option><option value="openai-responses">OpenAI · Responses</option><option value="anthropic-messages">Anthropic · Messages</option></select><small data-i18n="protocolHelp">Select the protocol your endpoint supports.</small></label>
+            </div>
+            <label class="spaced"><span>Base URL</span><input id="base-url" type="url" required placeholder="https://api.example.com/v1" autocomplete="off" spellcheck="false"><small id="url-help"></small></label>
+            <div class="endpoint-preview"><span data-i18n="requestPreview">REQUEST PREVIEW</span><div><b>GET</b><code id="models-url">…</code></div><div><b>POST</b><code id="chat-url">…</code></div></div>
+            <div class="grid auth-grid spaced">
+              <label><span>API key</span><input id="api-key" type="password" placeholder="sk-…" autocomplete="new-password" spellcheck="false"><small id="key-help"></small></label>
+              <div class="auth-status"><span class="eyebrow" data-i18n="credentialSource">CREDENTIAL SOURCE</span><span id="auth-source">not configured</span><button id="remove-key" class="text-danger" type="button" hidden data-i18n="removeKey">Remove saved key</button></div>
+            </div>
+            <label class="checkbox-line spaced"><input id="auth-header" type="checkbox"><span data-i18n="bearer">Also send an explicit Authorization: Bearer header (Pi authHeader)</span></label>
+            <label class="spaced"><span data-i18n="providerSystemRole">Default system prompt role — this provider</span><select id="provider-system-role"><option value="" data-i18n="providerRoleAuto">Pi automatic detection</option><option value="system" data-i18n="roleSystem">system — compatible gateways</option><option value="developer" data-i18n="roleDeveloper">developer — when reasoning is enabled</option></select><small data-i18n="providerRoleHelp">For OpenAI-compatible APIs. Applies to existing and newly added models that follow the provider setting. Model-specific overrides take priority.</small></label>
+            <p id="advanced-note" class="hint" hidden data-i18n="advanced">Existing advanced fields and custom headers are preserved. Model-level overrides can change the effective request.</p>
+          </fieldset>
+          <div class="action-row"><button id="test-connection" type="button" data-i18n="testConnection">Test connection</button><button id="fetch-models" type="button" class="primary" data-i18n="fetchModels">Fetch models ↗</button><span class="hint" data-i18n="testHint">Checks the model-list endpoint. No generation request.</span></div>
+          <div id="diagnostics" role="status" class="diagnostics" hidden></div>
+        </section>
+        <section class="card">
+          <div class="section-heading"><div><span class="step">02</span><h2 data-i18n="models">Models</h2><span id="model-count" class="count">0</span></div><div class="action-row"><button id="fill-limits" type="button" class="quiet" data-i18n="fillLimits">Fill missing limits</button><button id="add-model" type="button" class="quiet" data-i18n="addModel">+ Manual model</button></div></div>
+          <p class="hint" data-i18n="modelHint">Select models to save. A listed ID does not guarantee chat, vision or tool support.</p>
+          <p class="hint" data-i18n="limitsHelp">Context/output defaults come from endpoint metadata, then exact, unambiguous matches in Pi's bundled catalog. Gateway limits can differ. Existing values are kept; save the provider to persist filled defaults.</p>
+          <p class="hint" data-i18n="probeHelp">Test chat sends one short request. Check capabilities runs chat, a two-turn test tool, reasoning and a generated image (up to 5 requests). Uses API tokens: up to 256 output tokens per request, 2,048 for reasoning. Results appear below each model.</p>
+          <div class="model-toolbar"><input id="model-search" type="search" placeholder="Search model IDs…" aria-label="Search models"><label class="checkbox-line"><input id="select-all" type="checkbox"><span data-i18n="selectAll">Select visible</span></label><span id="selected-count" class="hint">0 selected</span></div>
+          <div class="table-scroll"><table><thead><tr><th class="check-col"></th><th data-i18n="modelId">Model ID</th><th data-i18n="tokenLimits">Token limits</th><th data-i18n="input">Input</th><th data-i18n="actions">Actions</th></tr></thead><tbody id="models-body"></tbody></table></div>
+          <div id="empty-models" class="empty"><span class="empty-icon">◇</span><h3 data-i18n="noModels">Connect your first model</h3><p data-i18n="noModelsHint">Fetch models from your endpoint, or add a model ID manually.</p></div>
+        </section>
+        <div class="save-bar"><div><strong id="save-summary"></strong><small data-i18n="saveHelp">Models → models.json · Key → auth.json</small></div><div class="action-row"><button id="delete-provider" type="button" class="text-danger" hidden data-i18n="deleteProvider">Delete provider</button><button id="save-provider" type="submit" class="primary" data-i18n="save">Save provider</button></div></div>
+      </form>
+      <p class="footnote" data-i18n="footnote">Configuration is saved locally. Open /model in Pi to select a saved model. “Set default” applies to new Pi launches.</p>
+    </main>
+  </div>
+  <dialog id="model-dialog"><form id="model-form"><div class="section-heading"><h2 data-i18n="editModel">Model settings</h2><button id="close-dialog" type="button" class="quiet" aria-label="Close">×</button></div>
+    <label><span data-i18n="modelId">Model ID</span><input id="edit-model-id" required maxlength="300" spellcheck="false"></label>
+    <label class="spaced"><span data-i18n="displayName">Display name (optional)</span><input id="edit-model-name"></label>
+    <div class="grid two spaced"><label><span data-i18n="context">Context window</span><input id="edit-context" type="number" min="1" step="1" placeholder="Pi default: 128000" aria-describedby="edit-context-source"><small id="edit-context-source"></small></label><label><span data-i18n="maxOutput">Max output tokens</span><input id="edit-max" type="number" min="1" step="1" placeholder="Pi default: 16384" aria-describedby="edit-max-source"><small id="edit-max-source"></small></label></div>
+    <button id="use-model-limits" type="button" class="quiet spaced" data-i18n="useLimits">Use detected limits</button>
+    <p id="limit-lookup-status" class="hint" role="status"></p>
+    <div class="grid two spaced"><label><span data-i18n="vision">Vision input</span><select id="edit-vision"><option value="" data-i18n="defaultText">Pi default (text)</option><option value="no" data-i18n="textOnly">Text only</option><option value="yes" data-i18n="textImage">Text + image</option></select></label><label><span data-i18n="reasoning">Reasoning support</span><select id="edit-reasoning"><option value="" data-i18n="defaultOff">Pi default (off)</option><option value="no" data-i18n="off">Off</option><option value="yes" data-i18n="on">On</option></select></label></div>
+    <label class="spaced"><span data-i18n="systemRole">System prompt role (OpenAI)</span><select id="edit-system-role"><option value="" data-i18n="roleAuto">Follow Pi / provider settings</option><option value="system" data-i18n="roleSystem">system — compatible gateways</option><option value="developer" data-i18n="roleDeveloper">developer — when reasoning is enabled</option></select><small data-i18n="roleHelp">For gateways that reject the developer role with HTTP 400/422, choose system. Saved as compat.supportsDeveloperRole; reasoning remains enabled.</small></label>
+    <p class="hint" data-i18n="metadataHelp">Leave unknown values at Pi defaults. Enabling a capability here does not add it to the upstream model.</p><button type="submit" class="primary wide" data-i18n="applyModel">Apply model settings</button>
+  </form></dialog>
+</body>
+</html>
