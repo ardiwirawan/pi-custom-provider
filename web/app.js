@@ -1,10 +1,10 @@
 const $ = (id) => document.getElementById(id);
 const translations = {
   id: {
-    local:"Workspace lokal",providers:"Provider",addProvider:"+ Tambah provider",configuration:"KONFIGURASI",docs:"Dokumentasi resmi Pi ↗",connections:"KONEKSI",subtitle:"Endpoint dan model pilihanmu. Konfigurasi asli Pi.",refresh:"Muat ulang konfigurasi",connection:"Koneksi",native:"Format Pi",readonly:"Provider ini dikelola Pi atau integrasi lain. Buat provider custom untuk mengedit di sini.",providerId:"ID provider",idHelp:"Nama unik di Pi, misalnya my-gateway.",protocol:"Protokol API",protocolHelp:"Pilih protokol yang didukung endpoint.",requestPreview:"PREVIEW REQUEST",credentialSource:"SUMBER KREDENSIAL",removeKey:"Hapus key tersimpan",bearer:"Tambahkan header Authorization: Bearer secara eksplisit (Pi authHeader)",advanced:"Field lanjutan dan header custom yang sudah ada dipertahankan. Override per model dapat mengubah request efektif.",testConnection:"Tes koneksi",fetchModels:"Tarik model ↗",testHint:"Memeriksa daftar model. Tanpa request generasi.",models:"Model",addModel:"+ Model manual",modelHint:"Pilih model untuk disimpan. ID yang terdaftar belum menjamin dukungan chat, vision, atau tools.",selectAll:"Pilih yang terlihat",modelId:"ID model",context:"Konteks",input:"Input",actions:"Aksi",noModels:"Hubungkan model pertamamu",noModelsHint:"Tarik model dari endpoint atau tambahkan ID secara manual.",saveHelp:"Model → models.json · Key → auth.json",deleteProvider:"Hapus provider",save:"Simpan provider",footnote:"Konfigurasi disimpan lokal. Buka /model di Pi untuk memilih model. Default berlaku saat Pi dibuka kembali.",editModel:"Pengaturan model",displayName:"Nama tampilan (opsional)",maxOutput:"Maksimal token output",vision:"Input gambar",reasoning:"Dukungan reasoning",defaultText:"Default Pi (teks)",defaultOff:"Default Pi (nonaktif)",textOnly:"Teks saja",textImage:"Teks + gambar",off:"Nonaktif",on:"Aktif",metadataHelp:"Biarkan nilai yang belum diketahui memakai default Pi. Mengaktifkan opsi tidak menambahkan kemampuan pada model upstream.",applyModel:"Terapkan pengaturan",newProvider:"Provider baru",selected:"dipilih",edit:"Edit",test:"Tes",setDefault:"Jadikan default",default:"Default",remove:"Hapus",unsaved:"Ada perubahan yang belum disimpan. Lanjutkan?",keyHelp:"Kosongkan untuk mempertahankan key. Key baru disimpan di auth.json.",openaiHelp:"URL asli Pi. Biasanya diakhiri /v1; SDK menambahkan /chat/completions atau /responses.",anthropicHelp:"URL asli Pi. Biasanya tanpa /v1 di akhir; SDK menambahkan /v1/messages. Prefix gateway seperti /anthropic tetap dipakai.",busy:"Sedang memproses…",saved:"Provider tersimpan. Buka /model di Pi untuk memilihnya.",confirmDelete:"Hapus konfigurasi provider ini? Kredensialnya tetap tersimpan.",confirmKey:"Hapus key provider dari auth.json? Sumber key lain tetap dapat dipakai Pi.",confirmTest:"Kirim prompt singkat ke model ini? Tes memakai token, tanpa mengirim file atau percakapan proyek.",defaultSaved:"Default tersimpan untuk sesi Pi berikutnya.",fetchDone:"Daftar model diterima",allFetched:"Semua halaman yang dilaporkan endpoint telah diambil.",removeModel:"Hapus model ini dari pilihan? Perubahan berlaku setelah disimpan.",missingToken:"Buka manager dari link yang ditampilkan Pi.",search:"Cari ID model…",noProviders:"Belum ada provider custom.",saveFirst:"Simpan provider dahulu.",duplicate:"ID model sudah ada.",fallback:"default Pi",keyRemoved:"Key di auth.json dihapus.",working:"Bekerja",connectionOk:"Endpoint daftar model merespons.",refreshDone:"Konfigurasi dimuat ulang.",defaultHelp:"Berlaku saat Pi dibuka kembali.",partial:"Sebagian hasil",matches:"terlihat",
+    local:"Workspace lokal",providers:"Provider",addProvider:"+ Tambah provider",configuration:"KONFIGURASI",docs:"Dokumentasi resmi Pi ↗",connections:"KONEKSI",subtitle:"Endpoint dan model pilihanmu. Konfigurasi asli Pi.",refresh:"Muat ulang konfigurasi",connection:"Koneksi",native:"Format Pi",readonly:"Provider ini dikelola Pi atau integrasi lain. Buat provider custom untuk mengedit di sini.",defaultProviderBadge:"Default Pi",defaultProviderNote:"Provider ini adalah default Pi dan belum dapat dihapus. Untuk menghapusnya, buka provider lain lalu pilih ‘Jadikan default’ pada salah satu modelnya.",defaultActionHelp:"‘Jadikan default’ pada Aksi model menetapkan model dan provider tersebut sebagai default Pi untuk pembukaan berikutnya.",providerId:"ID provider",idHelp:"Nama unik di Pi, misalnya my-gateway.",protocol:"Protokol API",protocolHelp:"Pilih protokol yang didukung endpoint.",requestPreview:"PREVIEW REQUEST",credentialSource:"SUMBER KREDENSIAL",removeKey:"Hapus key tersimpan",bearer:"Tambahkan header Authorization: Bearer secara eksplisit (Pi authHeader)",advanced:"Field lanjutan dan header custom yang sudah ada dipertahankan. Override per model dapat mengubah request efektif.",testConnection:"Tes koneksi",fetchModels:"Tarik model ↗",testHint:"Memeriksa daftar model. Tanpa request generasi.",models:"Model",addModel:"+ Model manual",modelHint:"Pilih model untuk disimpan. ID yang terdaftar belum menjamin dukungan chat, vision, atau tools.",selectAll:"Pilih yang terlihat",modelId:"ID model",context:"Konteks",input:"Input",actions:"Aksi",noModels:"Hubungkan model pertamamu",noModelsHint:"Tarik model dari endpoint atau tambahkan ID secara manual.",saveHelp:"Model → models.json · Key → auth.json",deleteProvider:"Hapus provider",save:"Simpan provider",footnote:"Konfigurasi disimpan lokal. Buka /model di Pi untuk memilih model. Default berlaku saat Pi dibuka kembali.",editModel:"Pengaturan model",displayName:"Nama tampilan (opsional)",maxOutput:"Maksimal token output",vision:"Input gambar",reasoning:"Dukungan reasoning",defaultText:"Default Pi (teks)",defaultOff:"Default Pi (nonaktif)",textOnly:"Teks saja",textImage:"Teks + gambar",off:"Nonaktif",on:"Aktif",metadataHelp:"Biarkan nilai yang belum diketahui memakai default Pi. Mengaktifkan opsi tidak menambahkan kemampuan pada model upstream.",applyModel:"Terapkan pengaturan",newProvider:"Provider baru",selected:"dipilih",edit:"Edit",test:"Tes",setDefault:"Jadikan default",default:"Default",remove:"Hapus",unsaved:"Ada perubahan yang belum disimpan. Lanjutkan?",keyHelp:"Kosongkan untuk mempertahankan key. Key baru disimpan di auth.json.",openaiHelp:"URL asli Pi. Biasanya diakhiri /v1; SDK menambahkan /chat/completions atau /responses.",anthropicHelp:"URL asli Pi. Biasanya tanpa /v1 di akhir; SDK menambahkan /v1/messages. Prefix gateway seperti /anthropic tetap dipakai.",busy:"Sedang memproses…",saved:"Provider tersimpan. Buka /model di Pi untuk memilihnya.",confirmDelete:"Hapus konfigurasi provider ini? Kredensialnya tetap tersimpan.",confirmKey:"Hapus key provider dari auth.json? Sumber key lain tetap dapat dipakai Pi.",confirmTest:"Kirim prompt singkat ke model ini? Tes memakai token, tanpa mengirim file atau percakapan proyek.",defaultSaved:"Default tersimpan untuk sesi Pi berikutnya.",fetchDone:"Daftar model diterima",allFetched:"Semua halaman yang dilaporkan endpoint telah diambil.",removeModel:"Hapus model ini dari pilihan? Perubahan berlaku setelah disimpan.",missingToken:"Buka manager dari link yang ditampilkan Pi.",search:"Cari ID model…",noProviders:"Belum ada provider custom.",saveFirst:"Simpan provider dahulu.",duplicate:"ID model sudah ada.",fallback:"default Pi",keyRemoved:"Key di auth.json dihapus.",working:"Bekerja",connectionOk:"Endpoint daftar model merespons.",refreshDone:"Konfigurasi dimuat ulang.",defaultHelp:"Berlaku saat Pi dibuka kembali.",partial:"Sebagian hasil",matches:"terlihat",
   },
   en: {
-    newProvider:"New provider",selected:"selected",edit:"Edit",test:"Test",setDefault:"Set default",default:"Default",remove:"Remove",unsaved:"You have unsaved changes. Continue?",keyHelp:"Leave blank to keep the current key. New keys are stored in auth.json.",openaiHelp:"Pi-native URL. Usually ends in /v1; the SDK appends /chat/completions or /responses.",anthropicHelp:"Pi-native URL. Usually no trailing /v1; the SDK appends /v1/messages. Gateway prefixes such as /anthropic are preserved.",busy:"Working…",saved:"Provider saved. Open /model in Pi to select it.",confirmDelete:"Delete this provider configuration? Its credentials will be kept.",confirmKey:"Remove this provider's key from auth.json? Pi may still use other configured key sources.",confirmTest:"Send a short prompt to this model? This uses tokens, but sends no project files or chat history.",defaultSaved:"Default saved for new Pi launches.",fetchDone:"Model list received",allFetched:"All pages reported by the endpoint have been fetched.",removeModel:"Remove this model from the selection? Changes take effect after saving.",missingToken:"Open the manager using the link printed by Pi.",search:"Search model IDs…",noProviders:"No custom providers yet.",saveFirst:"Save the provider first.",duplicate:"This model ID already exists.",fallback:"Pi default",keyRemoved:"Saved key removed from auth.json.",working:"Working",connectionOk:"Model-list endpoint responded.",refreshDone:"Configuration reloaded.",defaultHelp:"Applies to new Pi launches.",partial:"Partial results",matches:"visible",
+    newProvider:"New provider",selected:"selected",edit:"Edit",test:"Test",setDefault:"Set default",default:"Default",defaultProviderBadge:"Pi default",defaultProviderNote:"This provider is Pi's default and cannot be deleted yet. To delete it, open another provider and choose ‘Set default’ on one of its models.",defaultActionHelp:"‘Set default’ in a model's Actions makes that model and provider Pi's default for new launches.",remove:"Remove",unsaved:"You have unsaved changes. Continue?",keyHelp:"Leave blank to keep the current key. New keys are stored in auth.json.",openaiHelp:"Pi-native URL. Usually ends in /v1; the SDK appends /chat/completions or /responses.",anthropicHelp:"Pi-native URL. Usually no trailing /v1; the SDK appends /v1/messages. Gateway prefixes such as /anthropic are preserved.",busy:"Working…",saved:"Provider saved. Open /model in Pi to select it.",confirmDelete:"Delete this provider configuration? Its credentials will be kept.",confirmKey:"Remove this provider's key from auth.json? Pi may still use other configured key sources.",confirmTest:"Send a short prompt to this model? This uses tokens, but sends no project files or chat history.",defaultSaved:"Default saved for new Pi launches.",fetchDone:"Model list received",allFetched:"All pages reported by the endpoint have been fetched.",removeModel:"Remove this model from the selection? Changes take effect after saving.",missingToken:"Open the manager using the link printed by Pi.",search:"Search model IDs…",noProviders:"No custom providers yet.",saveFirst:"Save the provider first.",duplicate:"This model ID already exists.",fallback:"Pi default",keyRemoved:"Saved key removed from auth.json.",working:"Working",connectionOk:"Model-list endpoint responded.",refreshDone:"Configuration reloaded.",defaultHelp:"Applies to new Pi launches.",partial:"Partial results",matches:"visible",
   },
 };
 const original = new Map([...document.querySelectorAll("[data-i18n]")].map((el) => [el, el.textContent]));
@@ -118,7 +118,7 @@ function translate() {
   $("editor-title").textContent = state.id || t("newProvider");
   if (noticeTranslation) $("notice").textContent = t(noticeTranslation);
   if (editingLimits) renderLimitEditor();
-  renderProviders(); renderModels();
+  renderProviders(); renderDefaultProviderNote(); renderModels();
 }
 
 async function api(path, data, signal) {
@@ -173,11 +173,23 @@ function renderProviders() {
     button.className = state.id === provider.id ? "active" : "";
     const title = document.createElement("strong"); title.textContent = provider.id;
     const detail = document.createElement("small"); detail.textContent = `${provider.models.length} models · ${provider.api || "Pi managed"}`;
-    button.append(title, detail);
+    button.append(title);
+    if (provider.id === state.config?.defaultProvider) {
+      const badge = document.createElement("span"); badge.className = "provider-default-badge"; badge.textContent = t("defaultProviderBadge"); button.append(badge);
+    }
+    button.append(detail);
     button.onclick = () => { if (!state.dirty || confirm(t("unsaved"))) loadProvider(provider.id); };
     list.append(button);
   }
   setDisabled();
+}
+
+function renderDefaultProviderNote() {
+  const isDefault = !!state.id && state.id === state.config?.defaultProvider;
+  const note = $("default-provider-note");
+  note.hidden = !isDefault;
+  note.textContent = isDefault ? t("defaultProviderNote") : "";
+  $("delete-provider").classList.toggle("delete-default-provider", isDefault);
 }
 
 function loadProvider(id = null, preserveResults = false) {
@@ -205,6 +217,7 @@ function loadProvider(id = null, preserveResults = false) {
   $("readonly-note").hidden = !state.readOnly;
   $("advanced-note").hidden = !provider?.hasHiddenSettings;
   $("delete-provider").hidden = !provider;
+  renderDefaultProviderNote();
   $("model-search").value = "";
   $("diagnostics").hidden = true;
   translate(); preview();
@@ -556,7 +569,7 @@ async function testModel(model, checks) {
 }
 async function setDefault(model) {
   if (!state.id || state.dirty || !model.selected) { notify(t("saveFirst"), "warning"); return; }
-  await operation(async () => { const result = await api("default", { id: state.id, modelId: model.id }); state.config = result.state; renderModels(); notify(t("defaultSaved")); });
+  await operation(async () => { const result = await api("default", { id: state.id, modelId: model.id }); state.config = result.state; renderProviders(); renderDefaultProviderNote(); renderModels(); notify(t("defaultSaved")); });
 }
 $("provider-form").onsubmit = (event) => {
   event.preventDefault();
@@ -566,7 +579,13 @@ $("provider-form").onsubmit = (event) => {
   });
 };
 $("delete-provider").onclick = () => {
-  if (!state.id || !confirm(t("confirmDelete"))) return;
+  if (!state.id) return;
+  if (state.id === state.config?.defaultProvider) {
+    notify(t("defaultProviderNote"), "warning");
+    $("default-provider-note").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (!confirm(t("confirmDelete"))) return;
   operation(async () => { const result = await api("delete", { id: state.id, revision: state.config.revision }); state.config = result.state; loadProvider(); notify(result.message); });
 };
 $("remove-key").onclick = () => {
@@ -584,6 +603,6 @@ translate();
 if (!token) notify(t("missingToken"), "error");
 else operation(async () => {
   state.config = await api("state");
-  $("config-path").textContent = state.config.dir; $("version").textContent = `Pi ${state.config.piVersion} · Manager 0.1.0`;
+  $("config-path").textContent = state.config.dir; $("version").textContent = `Pi ${state.config.piVersion} · Manager ${state.config.managerVersion}`;
   loadProvider(state.config.providers.find((p) => !p.readOnly)?.id || null);
 });

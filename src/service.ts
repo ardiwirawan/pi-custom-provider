@@ -1,10 +1,14 @@
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ModelRuntime, readStoredCredential, SettingsManager, VERSION } from "@earendil-works/pi-coding-agent";
 import { ConfigStore, parseDocument, patch, readText } from "./storage.ts";
 import { discover, endpointUrls, requestHeaders } from "./discovery.ts";
 import { CAPABILITIES, probeModel, type Capability } from "./probes.ts";
 import { LimitCatalog, LIMIT_FIELDS } from "./limits.ts";
 import { APIS, AppError, mergeCompat, validateDraft, validateId, type JsonObject, type ModelInput, type ProviderDraft } from "./types.ts";
+
+const MANAGER_VERSION = JSON.parse(readFileSync(fileURLToPath(new URL("../package.json", import.meta.url)), "utf8")).version as string;
 
 function visibleCompat(entry: JsonObject): ModelInput["compat"] {
   return typeof entry.compat?.supportsDeveloperRole === "boolean" ? { supportsDeveloperRole: entry.compat.supportsDeveloperRole } : undefined;
@@ -50,7 +54,7 @@ export class ProviderService {
       };
     });
     return {
-      dir: this.dir, piVersion: VERSION, revision: current.revision, providers,
+      dir: this.dir, piVersion: VERSION, managerVersion: MANAGER_VERSION, revision: current.revision, providers,
       defaultProvider: settings.defaultProvider ?? "", defaultModel: settings.defaultModel ?? "",
       reservedIds: [...this.reserved],
     };
@@ -175,7 +179,9 @@ export class ProviderService {
     const current = await this.store.read();
     this.assertEditable(id, current.data.providers[id]);
     const settings = parseDocument(await readText(join(this.dir, "settings.json")));
-    if (settings.defaultProvider === id) throw new AppError("Choose another default provider before deleting this one.");
+    if (settings.defaultProvider === id) {
+      throw new AppError("This provider is Pi's default and cannot be deleted yet. Open another provider, choose Set default on one of its models, then try again.");
+    }
     await this.store.update(expected, (text) => patch(text, ["providers", id], undefined));
     await this.onSaved?.();
     return { ok: true, message: "Provider removed. Its credentials remain in auth.json; remove them separately if needed.", state: await this.state() };

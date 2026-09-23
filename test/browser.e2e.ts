@@ -74,6 +74,47 @@ test("browser workflow: connect, discover, configure, test and save a provider",
   assert.deepEqual(errors, []);
 });
 
+test("default provider status explains deletion and moving the default enables removal", async (t) => {
+  const temp = await temporaryAgent(); t.after(temp.close);
+  await writeFile(join(temp.dir, "models.json"), JSON.stringify({ providers: {
+    alpha: { api: "openai-completions", baseUrl: "https://alpha.example/v1", models: [{ id: "alpha-model-ux" }] },
+    beta: { api: "openai-completions", baseUrl: "https://beta.example/v1", models: [{ id: "beta-model-ux" }] },
+  } }));
+  await writeFile(join(temp.dir, "settings.json"), JSON.stringify({ defaultProvider: "alpha", defaultModel: "alpha-model-ux" }));
+  const manager = await startManager(temp.dir); t.after(manager.close);
+  const browser = await chromium.launch({ ...(process.platform === "win32" ? { channel: "msedge" } : {}), headless: true });
+  t.after(() => browser.close());
+  const page = await browser.newPage();
+  page.on("dialog", (dialog) => void dialog.accept());
+  await page.goto(manager.url);
+  await page.locator("#provider-id").waitFor();
+  assert.match(await page.locator("#version").textContent() || "", /Manager 0\.1\.2/);
+
+  const alpha = page.locator("#provider-list button", { hasText: "alpha" });
+  const beta = page.locator("#provider-list button", { hasText: "beta" });
+  assert.match(await alpha.textContent() || "", /Pi default/);
+  await page.locator("#default-provider-note").filter({ hasText: "cannot be deleted" }).waitFor();
+  assert.match(await page.locator('[data-i18n="defaultActionHelp"]').textContent() || "", /Set default/);
+
+  await page.locator("#delete-provider").click();
+  await page.locator("#notice.warning").filter({ hasText: "Set default" }).waitFor();
+  assert.ok(JSON.parse(await readFile(join(temp.dir, "models.json"), "utf8")).providers.alpha);
+
+  await beta.click();
+  await page.locator('.model-row[data-model-id="beta-model-ux"]').getByRole("button", { name: "Set default", exact: true }).click();
+  await page.locator("#notice").filter({ hasText: "Default saved" }).waitFor();
+  assert.match(await beta.textContent() || "", /Pi default/);
+  assert.doesNotMatch(await alpha.textContent() || "", /Pi default/);
+
+  await alpha.click();
+  assert.equal(await page.locator("#default-provider-note").isHidden(), true);
+  await page.locator("#delete-provider").click();
+  await page.locator("#provider-list button", { hasText: "alpha" }).waitFor({ state: "detached" });
+  const saved = JSON.parse(await readFile(join(temp.dir, "models.json"), "utf8"));
+  assert.equal(saved.providers.alpha, undefined);
+  assert.ok(saved.providers.beta);
+});
+
 test("model results stay isolated, inconclusive checks stay explicit, and cancellation stops the queue", async (t) => {
   const temp = await temporaryAgent(); t.after(temp.close);
   const upstream = await mockProvider({ behavior: "ignored", delayMs: 200, rejectModel: "model-b" }); t.after(upstream.close);

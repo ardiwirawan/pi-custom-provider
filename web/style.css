@@ -93,6 +93,7 @@ nav button { text-align: left; border-color: transparent; background: transparen
 nav button.active { background: var(--soft); color: var(--accent); border-color: #c9e0d8; }
 nav button strong { display: block; overflow-wrap: anywhere; }
 nav button small { display: block; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; line-height: 1.6; }
+.provider-default-badge { display: inline-block; margin-top: 8px; border-radius: 6px; background: #e4f4eb; color: #21634e; padding: 4px 9px; font-weight: 600; }
 
 .sidebar-footer {
   margin-top: auto;
@@ -214,7 +215,7 @@ td button { padding: 9px 10px; }
 .save-bar small { display: block; color: var(--muted); margin-top: 8px; }
 .footnote { color: var(--muted); line-height: 1.7; margin-top: 24px; }
 
-.diagnostics, #notice, .info {
+.diagnostics, #notice, .info, .warning {
   padding: 16px 18px;
   border-radius: 8px;
   line-height: 1.7;
@@ -226,8 +227,9 @@ td button { padding: 9px 10px; }
 }
 
 .diagnostics.error, #notice.error { background: #fff1ef; color: #9f3e3e; }
-#notice, .info { margin: 0 0 24px; }
-.diagnostics.warning, #notice.warning { background: #fff6df; color: #816522; }
+#notice, .info, .warning { margin: 0 0 24px; }
+.diagnostics.warning, #notice.warning, .warning { background: #fff6df; color: #765718; }
+.delete-default-provider { border: 1px solid #e8caca; padding: 8px 12px; }
 
 dialog {
   border: 1px solid var(--line);

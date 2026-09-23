@@ -27,6 +27,7 @@
         <section class="card">
           <div class="section-heading"><div><span class="step">01</span><h2 data-i18n="connection">Connection</h2></div><span class="tag" data-i18n="native">Pi native</span></div>
           <div id="readonly-note" class="info" hidden data-i18n="readonly">This provider is managed by Pi or another integration. Create a custom provider to edit here.</div>
+          <div id="default-provider-note" class="warning" role="status" hidden></div>
           <fieldset id="connection-fields">
             <div class="grid two">
               <label><span data-i18n="providerId">Provider ID</span><input id="provider-id" required maxlength="80" placeholder="my-gateway" autocomplete="off" spellcheck="false"><small data-i18n="idHelp">A unique name used by Pi, e.g. my-gateway.</small></label>
@@ -48,13 +49,14 @@
         <section class="card">
           <div class="section-heading"><div><span class="step">02</span><h2 data-i18n="models">Models</h2><span id="model-count" class="count">0</span></div><div class="action-row"><button id="fill-limits" type="button" class="quiet" data-i18n="fillLimits">Fill missing limits</button><button id="add-model" type="button" class="quiet" data-i18n="addModel">+ Manual model</button></div></div>
           <p class="hint" data-i18n="modelHint">Select models to save. A listed ID does not guarantee chat, vision or tool support.</p>
+          <p class="hint" data-i18n="defaultActionHelp">“Set default” in a model's Actions makes that model and provider Pi's default for new launches.</p>
           <p class="hint" data-i18n="limitsHelp">Context/output defaults come from endpoint metadata, then exact, unambiguous matches in Pi's bundled catalog. Gateway limits can differ. Existing values are kept; save the provider to persist filled defaults.</p>
           <p class="hint" data-i18n="probeHelp">Test chat sends one short request. Check capabilities runs chat, a two-turn test tool, reasoning and a generated image (up to 5 requests). Uses API tokens: up to 256 output tokens per request, 2,048 for reasoning. Results appear below each model.</p>
           <div class="model-toolbar"><input id="model-search" type="search" placeholder="Search model IDs…" aria-label="Search models"><label class="checkbox-line"><input id="select-all" type="checkbox"><span data-i18n="selectAll">Select visible</span></label><span id="selected-count" class="hint">0 selected</span></div>
           <div class="table-scroll"><table><thead><tr><th class="check-col"></th><th data-i18n="modelId">Model ID</th><th data-i18n="tokenLimits">Token limits</th><th data-i18n="input">Input</th><th data-i18n="actions">Actions</th></tr></thead><tbody id="models-body"></tbody></table></div>
           <div id="empty-models" class="empty"><span class="empty-icon">◇</span><h3 data-i18n="noModels">Connect your first model</h3><p data-i18n="noModelsHint">Fetch models from your endpoint, or add a model ID manually.</p></div>
         </section>
-        <div class="save-bar"><div><strong id="save-summary"></strong><small data-i18n="saveHelp">Models → models.json · Key → auth.json</small></div><div class="action-row"><button id="delete-provider" type="button" class="text-danger" hidden data-i18n="deleteProvider">Delete provider</button><button id="save-provider" type="submit" class="primary" data-i18n="save">Save provider</button></div></div>
+        <div class="save-bar"><div><strong id="save-summary"></strong><small data-i18n="saveHelp">Models → models.json · Key → auth.json</small></div><div class="action-row"><button id="delete-provider" type="button" class="text-danger" hidden aria-describedby="default-provider-note" data-i18n="deleteProvider">Delete provider</button><button id="save-provider" type="submit" class="primary" data-i18n="save">Save provider</button></div></div>
       </form>
       <p class="footnote" data-i18n="footnote">Configuration is saved locally. Open /model in Pi to select a saved model. “Set default” applies to new Pi launches.</p>
     </main>

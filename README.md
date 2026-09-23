@@ -2,7 +2,7 @@
 
 A small, local browser panel for configuring custom providers in [Pi](https://pi.dev). English and Indonesian UI. Built against the official **Pi 0.85.1** public extension and SDK APIs.
 
-**v0.1.0 — local prototype.** npm publication and package scope are not configured yet. `private: true` is intentional during development.
+Published on npm as [`pi-custom-provider-model`](https://www.npmjs.com/package/pi-custom-provider-model). Development uses a local path install; tagged releases are published through GitHub Actions.
 
 ## What works
 
@@ -17,11 +17,23 @@ A small, local browser panel for configuring custom providers in [Pi](https://pi
 - Preserve existing unknown settings/model overrides and JSON comments when editing; detect stale writes and retain the last 10 `models.json` backups.
 - Show credential source without returning saved keys or headers to the browser.
 
-## Try the prototype
+## Install
 
-Requires Node **22.19+** and Pi **0.85.1+**. Compatibility is currently tested with 0.85.1 on Windows/Edge; other versions/platforms need verification before release.
+Requires Node **22.19+** and Pi **0.85.1+**. Compatibility is currently tested with 0.85.1 on Windows/Edge.
 
-From this project directory:
+For normal use:
+
+```powershell
+pi install npm:pi-custom-provider-model
+```
+
+To update later:
+
+```powershell
+pi update npm:pi-custom-provider-model
+```
+
+For a one-off local development run from this project directory:
 
 ```powershell
 npm install --ignore-scripts
@@ -168,7 +180,7 @@ npm run pack:check
 
 Tests use isolated temporary directories and mock endpoints. Real gateway compatibility and RAM footprint have not been benchmarked yet.
 
-See [`docs/design.md`](docs/design.md) for the version-pinned official documentation and publication plan. Future distribution will be `pi install npm:@your-scope/package-name`, with a `pi` manifest and the `pi-package` keyword for the Pi catalog.
+See [`docs/design.md`](docs/design.md) for the version-pinned official documentation and release design. Tagged releases are published to npm as `pi-custom-provider-model` through GitHub Actions.
 
 ## License
 
