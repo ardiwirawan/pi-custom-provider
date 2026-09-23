@@ -131,6 +131,27 @@ test("model edits merge by ID, preserve key on blank input, and literal keys sur
   assert.equal((await service.state()).providers.length, 0);
 });
 
+test("vision fallback configuration only accepts authenticated image models and preserves unrelated fields", async (t) => {
+  const temp = await temporaryAgent(); t.after(temp.close);
+  const upstream = await mockProvider(); t.after(upstream.close);
+  const service = new ProviderService(temp.dir); await service.initialize();
+  let saved = await service.save({ id: "gateway", api: "openai-completions", baseUrl: `${upstream.base}/v1`, apiKey: "test-secret",
+    models: [{ id: "text-model", input: ["text"] }, { id: "vision-model", input: ["text", "image"] }], revision: (await service.state()).revision });
+  const before = await service.state();
+  await assert.rejects(service.setVisionFallback("gateway", "text-model", before.visionFallbackRevision), /support images/);
+  const configured = await service.setVisionFallback("gateway", "vision-model", before.visionFallbackRevision);
+  assert.deepEqual(configured.state.visionFallback, { provider: "gateway", model: "vision-model" });
+  assert.ok(configured.state.visionModels.some((model: any) => model.provider === "gateway" && model.id === "vision-model"));
+  const path = join(temp.dir, "pi-custom-provider.json");
+  const text = await readFile(path, "utf8");
+  await writeFile(path, text.replace(/\{/, '{\n  "futureSetting": true,'));
+  const refreshed = await service.state();
+  const disabled = await service.setVisionFallback("", "", refreshed.visionFallbackRevision);
+  assert.equal(disabled.state.visionFallback, null);
+  assert.equal(JSON.parse(await readFile(path, "utf8")).futureSetting, true);
+  assert.ok(saved.state.providers.length);
+});
+
 test("invalid files and provider IDs are not overwritten", async (t) => {
   const temp = await temporaryAgent(); t.after(temp.close);
   const service = new ProviderService(temp.dir); await service.initialize();

@@ -7,6 +7,7 @@ import { startManager } from "../src/server.ts";
 import { mockProvider, temporaryAgent } from "./fixtures.ts";
 import { getBuiltinModels } from "@earendil-works/pi-ai/providers/all";
 import { LimitCatalog } from "../src/limits.ts";
+import { ProviderService } from "../src/service.ts";
 
 test("browser workflow: connect, discover, configure, test and save a provider", async (t) => {
   const temp = await temporaryAgent(); t.after(temp.close);
@@ -74,6 +75,28 @@ test("browser workflow: connect, discover, configure, test and save a provider",
   assert.deepEqual(errors, []);
 });
 
+test("browser can select and persist an authenticated vision fallback model", async (t) => {
+  const temp = await temporaryAgent(); t.after(temp.close);
+  const upstream = await mockProvider(); t.after(upstream.close);
+  const service = new ProviderService(temp.dir); await service.initialize();
+  await service.save({ id: "gateway", api: "openai-completions", baseUrl: `${upstream.base}/v1`, apiKey: "test-secret",
+    models: [{ id: "text-only", input: ["text"] }, { id: "vision-capable", input: ["text", "image"] }], revision: (await service.state()).revision });
+  const manager = await startManager(temp.dir); t.after(manager.close);
+  const browser = await chromium.launch({ ...(process.platform === "win32" ? { channel: "msedge" } : {}), headless: true });
+  t.after(() => browser.close());
+  const page = await browser.newPage(); await page.goto(manager.url);
+  await page.locator("#vision-fallback").waitFor();
+  assert.equal(await page.locator("#vision-fallback option").count(), 2);
+  await page.locator("#vision-fallback").selectOption({ label: "gateway / vision-capable" });
+  await page.locator("#save-vision-fallback").click();
+  await page.locator("#notice").filter({ hasText: "Vision fallback setting saved" }).waitFor();
+  assert.deepEqual(JSON.parse(await readFile(join(temp.dir, "pi-custom-provider.json"), "utf8")).visionFallback,
+    { provider: "gateway", model: "vision-capable" });
+  await page.reload();
+  await page.locator("#vision-fallback").waitFor();
+  assert.match(await page.locator("#vision-fallback option:checked").textContent() || "", /vision-capable/);
+});
+
 test("default provider status explains deletion and moving the default enables removal", async (t) => {
   const temp = await temporaryAgent(); t.after(temp.close);
   await writeFile(join(temp.dir, "models.json"), JSON.stringify({ providers: {
@@ -88,7 +111,7 @@ test("default provider status explains deletion and moving the default enables r
   page.on("dialog", (dialog) => void dialog.accept());
   await page.goto(manager.url);
   await page.locator("#provider-id").waitFor();
-  assert.match(await page.locator("#version").textContent() || "", /Manager 0\.1\.2/);
+  assert.match(await page.locator("#version").textContent() || "", /Manager 0\.1\.3/);
 
   const alpha = page.locator("#provider-list button", { hasText: "alpha" });
   const beta = page.locator("#provider-list button", { hasText: "beta" });

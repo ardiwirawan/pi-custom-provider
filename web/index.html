@@ -23,6 +23,14 @@
     <main>
       <div class="page-heading"><div><span class="eyebrow" data-i18n="connections">CONNECTIONS</span><h1 id="editor-title">New provider</h1><p data-i18n="subtitle">Your endpoint. Your models. Native Pi configuration.</p></div><button id="refresh-state" class="quiet" data-i18n="refresh">Reload configuration</button></div>
       <div id="notice" role="status" aria-live="polite" hidden></div>
+      <section class="card vision-fallback-card">
+        <div class="section-heading"><div><span class="step">00</span><h2 data-i18n="visionFallback">Vision fallback</h2></div><span class="tag" data-i18n="globalSetting">Global setting</span></div>
+        <p class="hint" data-i18n="visionFallbackHelp">When the active Pi model cannot accept images, this model describes user and tool images first. The active model remains selected and performs the main reasoning.</p>
+        <div class="grid fallback-grid spaced">
+          <label><span data-i18n="visionFallbackModel">Fallback vision model</span><select id="vision-fallback"><option value="" data-i18n="visionFallbackOff">Disabled</option></select><small data-i18n="visionFallbackCredentialHelp">Only image-capable models with configured credentials are listed.</small></label>
+          <div class="fallback-action"><button id="save-vision-fallback" type="button" class="primary" data-i18n="saveVisionFallback">Save fallback</button></div>
+        </div>
+      </section>
       <form id="provider-form">
         <section class="card">
           <div class="section-heading"><div><span class="step">01</span><h2 data-i18n="connection">Connection</h2></div><span class="tag" data-i18n="native">Pi native</span></div>

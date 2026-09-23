@@ -1,6 +1,6 @@
 # v0.1 design and reference map
 
-Status: local prototype. Pi compatibility baseline: 0.85.1. Package name/scope and public repository have not been chosen. `private: true` prevents accidental publication while retaining local/git installation and tarball inspection.
+Status: published as `pi-custom-provider-model`. Pi compatibility baseline: 0.85.1. Tagged releases are published through GitHub Actions.
 
 ## Official Pi sources (version pinned)
 
@@ -32,6 +32,7 @@ API discovery complements Pi's documentation with [OpenAI Models](https://develo
 - API keys go through the public ModelRuntime login/logout interface using its native authPath-backed credential store. This keeps key interpolation and locking in Pi itself. No imports of private AuthStorage internals. API-key replacement follows Pi's /login semantics; unrelated providers and OAuth entries are preserved.
 - All configuration updates merge into the latest document under lock, check revisions, keep unknown fields/comments, and back up models.json. Conflicting external edits return a conflict instead of replacing the latest version. Native OAuth entries remain managed by Pi /login.
 - Existing built-in provider overrides are displayed read-only in v0.1. Manage custom provider definitions here.
+- Optional vision fallback is extension-owned configuration in `<agentDir>/pi-custom-provider.json`, not a non-native model/settings field. For a text-only active model, user images are transformed into a fallback model's textual description before the main agent starts; images from tool results are similarly replaced and nested usage is attached to that tool result. The active model remains selected. Native vision models bypass fallback, and direct prompts fail closed instead of silently dropping images when fallback fails.
 
 ## Components
 
@@ -51,4 +52,4 @@ Bind to 127.0.0.1 on a random port. A session token in the URL fragment is excha
 
 ## Publication checklist
 
-Choose an available npm scope/name and repository; add repository metadata and changelog; verify Windows and CI on Linux/macOS; run tests and inspect npm pack; remove private only for an intentional public release. Include the prebuilt web assets (this prototype needs no frontend build). Gallery indexing uses npm's pi-package keyword; listing timing is outside this project's control.
+Run `npm run verify` and `npm run pack:check`, update the committed package version, then push the matching `v*` tag. GitHub Actions validates the tag/version match and publishes to npm. Include the prebuilt web assets (there is no frontend build). Gallery indexing uses npm's `pi-package` keyword; listing timing is outside this project's control.

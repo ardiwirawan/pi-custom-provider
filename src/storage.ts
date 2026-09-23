@@ -33,12 +33,35 @@ export async function readText(path: string, fallback = "{}\n"): Promise<string>
   catch (error: any) { if (error.code === "ENOENT") return fallback; throw error; }
 }
 
-async function atomicWrite(path: string, content: string): Promise<void> {
+export async function atomicWrite(path: string, content: string): Promise<void> {
   const temporary = `${path}.${randomUUID()}.tmp`;
   try {
     await writeFile(temporary, content, { encoding: "utf8", mode: 0o600 });
     await rename(temporary, path);
   } finally { await unlink(temporary).catch(() => {}); }
+}
+
+export class ExtensionConfigStore {
+  readonly path: string;
+  constructor(readonly dir: string) { this.path = join(dir, "pi-custom-provider.json"); }
+
+  async read() {
+    const text = await readText(this.path, "{}\n");
+    return { text, data: parseDocument(text), revision: revision(text) };
+  }
+
+  async saveVisionFallback(expected: string, value: { provider: string; model: string } | undefined) {
+    await mkdir(this.dir, { recursive: true });
+    const release = await lockfile.lock(this.path, { realpath: false, retries: { retries: 20, minTimeout: 20, maxTimeout: 100 } });
+    try {
+      const current = await this.read();
+      if (current.revision !== expected) throw new AppError("Fallback configuration changed in another window. Reload before saving.", 409);
+      const next = patch(current.text, ["visionFallback"], value);
+      parseDocument(next);
+      if (next !== current.text) await atomicWrite(this.path, next);
+      return revision(next);
+    } finally { await release(); }
+  }
 }
 
 export class ConfigStore {

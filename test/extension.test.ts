@@ -5,7 +5,8 @@ import { discoverAndLoadExtensions, ModelRegistry, ModelRuntime, type ExtensionC
 import { mockProvider, temporaryAgent } from "./fixtures.ts";
 import { ProviderService } from "../src/service.ts";
 import { join } from "node:path";
-import type { Api, Model } from "@earendil-works/pi-ai";
+import type { Api, ImageContent, Model } from "@earendil-works/pi-ai";
+import { transformToolImages, transformUserImages } from "../src/vision-fallback.ts";
 
 test("Pi's official loader registers the command, serves assets, and closes on session shutdown", async (t) => {
   const temp = await temporaryAgent(); t.after(temp.close);
@@ -31,6 +32,37 @@ test("Pi's official loader registers the command, serves assets, and closes on s
   assert.equal(response.status, 200); assert.match(await response.text(), /Provider Manager/);
   await shutdown();
   await assert.rejects(fetch(url));
+});
+
+test("vision fallback converts user and tool images while keeping the text model active", async (t) => {
+  const temp = await temporaryAgent(); t.after(temp.close);
+  const upstream = await mockProvider({ behavior: "ignored" }); t.after(upstream.close);
+  const service = new ProviderService(temp.dir); await service.initialize();
+  await service.save({ id: "gateway", api: "openai-completions", baseUrl: `${upstream.base}/v1`, apiKey: "test-secret",
+    models: [{ id: "text-model", input: ["text"] }, { id: "vision-model", input: ["text", "image"] }], revision: (await service.state()).revision });
+  const state = await service.state();
+  await service.setVisionFallback("gateway", "vision-model", state.visionFallbackRevision);
+  const runtime = await ModelRuntime.create({ authPath: join(temp.dir, "auth.json"), modelsPath: join(temp.dir, "models.json"), refreshOnCreate: false });
+  const active = runtime.getModel("gateway", "text-model")!;
+  const notifications: string[] = [];
+  const ctx = { model: active, modelRegistry: new ModelRegistry(runtime), signal: undefined,
+    ui: { notify: (message: string) => notifications.push(message), setWorkingMessage: () => {} } } as unknown as ExtensionCommandContext;
+  const image: ImageContent = { type: "image", mimeType: "image/png", data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII=" };
+  const user = await transformUserImages(temp.dir, { text: "Inspect this", images: [image] }, ctx);
+  assert.equal(user?.action, "transform", notifications.join(" | "));
+  if (user?.action !== "transform") throw new Error("Expected transformed input");
+  assert.deepEqual(user.images, []); assert.match(user.text, /Vision fallback analysis/);
+  assert.equal(active.id, "text-model");
+  assert.equal(upstream.requests.at(-1)?.body.model, "vision-model");
+  assert.ok(upstream.requests.at(-1)?.body.messages[1].content.some((part: any) => part.type === "image_url"));
+  const tool = await transformToolImages(temp.dir, { content: [{ type: "text", text: "tool context" }, image] }, ctx);
+  assert.ok(tool?.content?.every((part) => part.type === "text"));
+  assert.match((tool?.content?.at(-1) as any).text, /Vision fallback analysis/);
+  assert.ok((tool?.usage?.totalTokens ?? 0) > 0);
+  assert.match(notifications[0], /continuing with gateway\/text-model/);
+  const native = { ...active, input: ["text", "image"] as ("text" | "image")[] };
+  const nativeCtx = { ...ctx, model: native } as unknown as ExtensionCommandContext;
+  assert.equal(await transformUserImages(temp.dir, { text: "Inspect", images: [image] }, nativeCtx), undefined);
 });
 
 test("panel saves and reload refresh the active model; busy sessions defer synchronization until settled", async (t) => {

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ModelRuntime, readStoredCredential, SettingsManager, VERSION } from "@earendil-works/pi-coding-agent";
-import { ConfigStore, parseDocument, patch, readText } from "./storage.ts";
+import { ConfigStore, ExtensionConfigStore, parseDocument, patch, readText } from "./storage.ts";
 import { discover, endpointUrls, requestHeaders } from "./discovery.ts";
 import { CAPABILITIES, probeModel, type Capability } from "./probes.ts";
 import { LimitCatalog, LIMIT_FIELDS } from "./limits.ts";
@@ -24,9 +24,13 @@ function visibleModel(model: JsonObject): ModelInput {
 
 export class ProviderService {
   readonly store: ConfigStore;
+  readonly extensionStore: ExtensionConfigStore;
   private reserved: Set<string> = new Set();
   private limitCatalog = new LimitCatalog();
-  constructor(readonly dir: string, private onSaved?: () => Promise<void>) { this.store = new ConfigStore(dir); }
+  constructor(readonly dir: string, private onSaved?: () => Promise<void>) {
+    this.store = new ConfigStore(dir);
+    this.extensionStore = new ExtensionConfigStore(dir);
+  }
 
   private async runtime() {
     return ModelRuntime.create({ authPath: join(this.dir, "auth.json"), modelsPath: this.store.path, refreshOnCreate: false });
@@ -39,7 +43,13 @@ export class ProviderService {
 
   async state() {
     const current = await this.store.read();
+    const extension = await this.extensionStore.read();
     const settings = parseDocument(await readText(join(this.dir, "settings.json")));
+    const runtime = await this.runtime();
+    const available = await runtime.getAvailable();
+    const visionModels = available.filter((model) => model.input.includes("image")).map((model) => ({
+      provider: model.provider, id: model.id, name: model.name,
+    })).sort((a, b) => `${a.provider}/${a.id}`.localeCompare(`${b.provider}/${b.id}`));
     const providers = Object.entries(current.data.providers).map(([id, entry]) => {
       const p = entry as JsonObject;
       const credential = readStoredCredential(id, join(this.dir, "auth.json"));
@@ -56,6 +66,7 @@ export class ProviderService {
     return {
       dir: this.dir, piVersion: VERSION, managerVersion: MANAGER_VERSION, revision: current.revision, providers,
       defaultProvider: settings.defaultProvider ?? "", defaultModel: settings.defaultModel ?? "",
+      visionFallback: extension.data.visionFallback ?? null, visionFallbackRevision: extension.revision, visionModels,
       reservedIds: [...this.reserved],
     };
   }
@@ -194,6 +205,29 @@ export class ProviderService {
     const runtime = await this.runtime();
     await runtime.logout(id);
     await this.onSaved?.();
+    return { ok: true, state: await this.state() };
+  }
+
+  async setVisionFallback(providerInput: unknown, modelInput: unknown, expected: unknown) {
+    if (typeof expected !== "string") throw new AppError("Reload fallback configuration before saving.", 409);
+    const disabled = (providerInput === "" || providerInput === null || providerInput === undefined)
+      && (modelInput === "" || modelInput === null || modelInput === undefined);
+    let value: { provider: string; model: string } | undefined;
+    if (!disabled) {
+      if (typeof providerInput !== "string" || !providerInput.trim() || providerInput.length > 100
+          || typeof modelInput !== "string" || !modelInput.trim() || modelInput.length > 300) {
+        throw new AppError("Choose a valid fallback vision model.");
+      }
+      const provider = providerInput.trim(); const modelId = modelInput.trim();
+      const runtime = await this.runtime();
+      const model = runtime.getModel(provider, modelId);
+      const available = await runtime.getAvailable(provider);
+      if (!model || !model.input.includes("image") || !available.some((entry) => entry.id === modelId)) {
+        throw new AppError("The fallback model must support images and have configured credentials.");
+      }
+      value = { provider, model: modelId };
+    }
+    await this.extensionStore.saveVisionFallback(expected, value);
     return { ok: true, state: await this.state() };
   }
 

@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { getAgentDir, VERSION, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { startManager } from "./server.ts";
+import { transformToolImages, transformUserImages } from "./vision-fallback.ts";
 
 function openBrowser(url: string) {
   const [program, args] = process.platform === "win32"
@@ -35,6 +36,8 @@ export default function (pi: ExtensionAPI) {
   pi.on("agent_settled", async (_event, ctx) => {
     if (pendingModelSync) await syncActiveModel(ctx);
   });
+  pi.on("input", async (event, ctx) => transformUserImages(getAgentDir(), event, ctx));
+  pi.on("tool_result", async (event, ctx) => transformToolImages(getAgentDir(), event, ctx));
   pi.registerCommand("custom-provider", {
     description: "Manage custom providers, API keys and models in a local browser",
     handler: async (args, ctx) => {

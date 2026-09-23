@@ -163,6 +163,9 @@ label small, .hint { color: var(--muted); font-weight: 400; line-height: 1.65; }
 .endpoint-preview b { color: var(--accent); }
 code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1rem; }
 .auth-grid { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+.fallback-grid { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.fallback-action { padding-bottom: 1px; }
+.fallback-action button { min-width: 160px; }
 .auth-status { display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--line); padding: 2px 0 0 24px; align-items: flex-start; overflow-wrap: anywhere; }
 .auth-status button { padding: 4px 0; }
 .checkbox-line { flex-direction: row; align-items: flex-start; gap: 12px; font-weight: 400; line-height: 1.6; }
@@ -252,7 +255,8 @@ dialog .hint { margin: 24px 0; }
   main { padding: 28px 24px; }
   .page-heading { align-items: flex-start; flex-direction: column; }
   .card { padding: 24px; }
-  .two, .auth-grid { grid-template-columns: minmax(0, 1fr); }
+  .two, .auth-grid, .fallback-grid { grid-template-columns: minmax(0, 1fr); }
+  .fallback-action button { width: 100%; }
   .auth-status { border-left: 0; padding-left: 0; }
   .probe-grid { grid-template-columns: minmax(0, 1fr); }
 }

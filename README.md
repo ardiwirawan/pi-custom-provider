@@ -16,6 +16,7 @@ Published on npm as [`pi-custom-provider-model`](https://www.npmjs.com/package/p
 - Save provider/model definitions to `models.json`, API keys through Pi's native `auth.json` handling, and startup defaults to `settings.json`.
 - Preserve existing unknown settings/model overrides and JSON comments when editing; detect stale writes and retain the last 10 `models.json` backups.
 - Show credential source without returning saved keys or headers to the browser.
+- Optionally route images through an authenticated vision-capable fallback model while keeping the selected Pi model responsible for the main reasoning and tool loop.
 
 ## Install
 
@@ -93,6 +94,12 @@ The extension uses Pi's `getAgentDir()`, including `PI_CODING_AGENT_DIR`. It doe
 6. Use **Test chat** for a quick streaming check, or **Check capabilities** for chat, tools, reasoning and image input. Progress and results appear directly under that model; **Stop tests** cancels the remaining work.
 7. Click **Save provider**, then select it in Pi's `/model` picker. **Set default** applies to future Pi launches.
 
+### Vision fallback
+
+Choose an authenticated image-capable model under **Vision fallback** and click **Save fallback**. When the active Pi model is text-only, the extension sends attached user images and images returned by tools to that fallback model for description. It then gives the description—not the image—to the active model, which remains selected and performs the main reasoning and tool loop.
+
+Fallback is bypassed when the active model already declares image input. If fallback analysis fails, a direct image prompt is stopped rather than silently dropping the image; a tool image is replaced with an explicit failure note. The fallback makes an additional model request and may incur provider usage/cost. Configuration is stored separately in `<agentDir>/pi-custom-provider.json`; native `models.json`, `auth.json`, and `settings.json` formats are not extended.
+
 ### Base URL examples
 
 | Protocol | Base URL | Model list | Chat |
@@ -162,6 +169,8 @@ The panel binds to `127.0.0.1`. It uses a per-launch token, same-origin requests
 Provider-scoped API keys use Pi's public `ModelRuntime.login()` / `logout()` and native credential store. Native API-key precedence and existing environment-variable references are respected. OAuth is managed by Pi's `/login` and `/logout`. Providers defined only by other extensions and built-in provider overrides are outside the v0.1 editor.
 
 Replacing a credential with provider-scoped `env` settings is currently refused to avoid losing that advanced state through Pi's login replacement behavior. Use Pi's native auth configuration for those entries. Deleting a provider retains its key; remove the key first if desired. Removing an `auth.json` key does not remove a fallback key from `models.json` or the environment.
+
+Vision fallback selection lives in `<agentDir>/pi-custom-provider.json`. The file contains only provider/model IDs, never credentials.
 
 Backups live in `<agentDir>/provider-manager-backups/`. To restore, stop the panel and copy the desired backup over `models.json`, then reopen `/model`. Backups can contain pre-existing secrets from models.json and are created with owner-only permissions where supported. Only `models.json` is backed up; authentication and defaults use Pi's own writers. A partial save reports which operation needs attention.
 

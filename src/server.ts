@@ -63,7 +63,7 @@ export async function startManager(dir: string, onSaved?: () => Promise<void>) {
       const controller = new AbortController();
       response.on("close", () => { if (!response.writableEnded) controller.abort(); });
       const signal = AbortSignal.any([controller.signal, lifecycle.signal]);
-      const writes = ["/api/save", "/api/delete", "/api/remove-key", "/api/default"];
+      const writes = ["/api/save", "/api/delete", "/api/remove-key", "/api/default", "/api/vision-fallback"];
       const isWrite = writes.includes(path);
       if (isWrite && mutationPending) throw new AppError("Another save is in progress. Try again.", 409);
       if (isWrite) mutationPending = true;
@@ -79,6 +79,7 @@ export async function startManager(dir: string, onSaved?: () => Promise<void>) {
           case "/api/delete": result = await service.remove(input.id, input.revision); break;
           case "/api/remove-key": result = await service.removeKey(input.id); break;
           case "/api/default": result = await service.setDefault(input.id, input.modelId); break;
+          case "/api/vision-fallback": result = await service.setVisionFallback(input.provider, input.modelId, input.revision); break;
           default: throw new AppError("Not found.", 404);
         }
         json(response, 200, result);
